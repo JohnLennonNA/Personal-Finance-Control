@@ -1,0 +1,7 @@
+
+body{background: #e8e6ff;}
+
+.fa-thumbs-down{ color: red;}
+.fa-thumbs-up{ color: green;}
+
+.footerMenu{position: fixed; bottom: 0; padding: 7px; background: #aeaeae; width: 100%;}
