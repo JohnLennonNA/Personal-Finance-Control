@@ -13,7 +13,13 @@ $app->get('/', function () use ($app) {
 $app->post('/addEvents', function (Request $request) use ($app) {
 
     try{
-        $response = Util::CurlRequest("ttp://localhost:9200/finance/events/", false, "POST");
+
+        $response = Util::CurlRequest(
+            "http://localhost:9200/finance/events/",
+            json_encode($request->request->get("data")),
+            "POST"
+        );
+
     }catch (Exception $e){
         
     }
@@ -24,7 +30,11 @@ $app->post('/addEvents', function (Request $request) use ($app) {
 $app->get('/listEvents', function () use ($app) {
 
     try{
-        $response = Util::CurlRequest("http://localhost:9200/finance/events/_search?pretty=true", false);
+        $response = Util::CurlRequest(
+            "http://localhost:9200/finance/events/_search?pretty=true",
+            "{\"from\" : 0, \"size\" : 100}"
+        );
+
     }catch (Exception $e){
 
     }

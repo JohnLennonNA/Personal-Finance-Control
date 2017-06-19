@@ -26,18 +26,7 @@
                         <th>Options</th>
                     </tr>
                     </thead>
-                    <tbody ng-app="scotchApp" ng-controller="mainController">
-                    <tr>
-                        <td><i class="fa fa-thumbs-up"></i></td>
-                        <td>01</td>
-                        <td>R$ 100.00</td>
-                        <td>loremd dasdsa dasdas das dsa</td>
-                        <td>
-                            <i class="fa fa-pencil editar initialism" title="Edit"></i>
-                            <i class="fa fa-times excluir initialism" title="Remove"></i>
-                            <i class='fa fa-money registrarPagamento initialism' title="Mark payed"></i>
-                        </td>
-                    </tr>
+                    <tbody class="billList">
                     </tbody>
                 </table>
             </div>
@@ -101,8 +90,9 @@
 <script>
     $( document ).ready(function() {
 
+        reflesh();
+
         $(".formAddEvents").on("click", ".addEventsButton" , function(){
-            console.log($(this).parent().find("#description").val());
             var objEvent = {
                 "description" : $(this).parent().find("#description").val(),
                 "value" : $(this).parent().find("#value").val(),
@@ -110,40 +100,71 @@
                 "type" : $(this).parent().find(".type:checked").val()
             }
 
-            console.log(objEvent);
-
             sendRquest("addEvents", objEvent, "POST", true, false);
         });
     });
 
     function reflesh(){
-        sendRquest("listEvents", false, "GET", false, function(teste){ updateTable(teste); });
+        console.log("REFLESH==");
+        sendRquest("listEvents", false, "GET", false, function(result){ mountTable(result); });
     }
 
-    function updateTable(result){
+    function mountTable(result){
+
+        console.log("MOUNTTABLE==");
+
+        $(".billList tr").remove();
 
         var data = JSON.parse(result).hits.hits;
 
-        for( i in data ){
-            console.log(data[i]);
+        console.log(data);
+
+        if(data.length > 0){
+            for( var i in data ){
+                var icon = (data[i]._source.type == 1)? "down" : "up";
+                var body = "<td><i class='fa fa-thumbs-" + icon + "'></i></td>";
+                body += "<td>" + data[i]._source.date + "</td>";
+                body += "<td> R$ " + data[i]._source.value + "</td>";
+                body += "<td>" + data[i]._source.description + "</td>";
+                body += "<td><i class='fa fa-pencil editar initialism' title='Edit'></i>";
+                body += "<i class='fa fa-times excluir initialism' title='Remove'></i>";
+                body += "<i class='fa fa-money registrarPagamento initialism' title='Mark payed'></i></td>";
+                $(".billList").append("<tr>" + body + "</tr>");
+            }
+
+            console.log("TABLEmounted");
         }
 
-//        console.log(JSON.parse(result).hits.hits);
+        console.log("end mount table");
     }
 
-    function sendRquest(route, obj, methodType, updateTable, callbakc){
+    function sendRquest(route, obj, methodType, updateTable, callBack){
+        console.log("SENDREQUEST== | " + "/" + route);
         $.ajax({
-            url: "/web/" + route,
-            data: obj,
+            url: "/" + route,
+            data: { data : (obj) ? obj : false  },
             method: methodType,
-            success: function(result){
+            success: function(data){
 
-                callbakc(result);
+                console.log(data);
 
-                if(updateTable === true){
+                console.log("before calback if");
+                if(callBack !== false){
+                    callBack(data);
+                }
+
+                console.log("before updateTable if");
+                if(updateTable){
                     reflesh();
                 }
-            }}
+
+                console.log("end send request");
+            },
+            error: function(data){
+                console.log("errors");
+                console.log(data);
+            }
+            }
         );
     }
 
