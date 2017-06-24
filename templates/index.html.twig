@@ -141,6 +141,7 @@
     function sendRquest(route, obj, methodType, updateTable, callBack){
         console.log("SENDREQUEST== | " + "/" + route);
         $.ajax({
+            cache: false,
             url: "/" + route,
             data: { data : (obj) ? obj : false  },
             method: methodType,
