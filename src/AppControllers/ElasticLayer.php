@@ -20,35 +20,34 @@ class ElasticLayer implements ServiceProviderInterface
 
     public function register(Container $app)
     {
-        $app['elastic'] = "elstic teste";
+        $app['elastic'] = $this;
     }
 
+    public function defineMethod($ref, $type, $data){
 
+        return $this->{$ref}($data, $type);
 
-
-
-    public function defineMethod($ref, $tipo ,$data){
-        $methods = array();
-//        $methods["insert"] = $this->insertAction();
-        $methods["list"] = $this->listAction($data, $tipo);
-
-        return $methods[$ref];
     }
 
-//    public function insertAction(){
-//        return "insert";
-//    }
-
-    public function listAction($data, $tipo){
-
-//        "{$this->uri}{$this->db}/{$tipo}/_search?pretty=true",
+    public function listAction($data, $type){
 
         $response = Util::CurlRequest(
-            "{$this->uri}{$this->db}/{$tipo}/_search",
+            "{$this->uri}{$this->db}/{$type}/_search",
             $data
         );
 
         return $response;
+    }
+
+    public function insertAction($data, $type){
+
+        $response = Util::CurlRequest(
+            "{$this->uri}{$this->db}/{$type}/",
+            $data,
+            "POST"
+        );
+
+        return $response = "";
     }
 
 

@@ -34,9 +34,10 @@ class Util
 
         }catch (Exception $e){
 
-
         }
+    }
 
+    static function normalizeData($data){
 
     }
 

@@ -2,7 +2,6 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use AppControllers\ElasticLayer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 $app->get('/', function () use ($app) {
@@ -14,69 +13,39 @@ $app->get('/list_events', function () use ($app) {
 
     try{
 
-        $result = new ElasticLayer();
-        $data = $app['elastic']->defineMethod(
-            "list",
-            "events",
-            "{\"from\" : 0, \"size\" : 19}"
-        );
+        $result = $app['elastic']->defineMethod("listAction", "events", "{\"from\" : 0, \"size\" : 19}");
 
         return JsonResponse::create([
             "code" => "200",
-            "message" => "retornado com sucesso",
-            "data" => $data]
+            "message" => "Executado com sucesso",
+            "data" => $result]
         );
 
     }catch (Exception $e){
-
         return JsonResponse::create(["code" => "500","message" => $app['elastic']]);
-//        return JsonResponse::create(["code" => "500","message" => $e->getMessage()]);
-
     }
+
 });
 
+$app->post('/add_events', function (Request $request) use ($app) {
 
+    try{
 
+        $data = [
+            'description' => $request->request->get("description"),
+            'value' => $request->request->get("value"),
+            'date' => $request->request->get("date"),
+            'type' => $request->request->get("type")
+        ];
 
+        $app['elastic']->defineMethod("insertAction", "events", json_encode($data));
+        return JsonResponse::create(["code" => "200","message" => "Cadastrado com sucesso"]);
 
-//$app->post('/addEvents', function (Request $request) use ($app) {
-//
-//    try{
-//
-//        $response = Util::CurlRequest(
-//            "http://localhost:9200/finance/events/",
-//            json_encode($request->request->get("data")),
-//            "POST"
-//        );
-//
-//    }catch (Exception $e){
-//
-//    }
-//
-//    return JsonResponse::create($response);
-//});
-//
-//$app->get('/listEvents', function () use ($app) {
-//
-//    try{
-//        $response = Util::CurlRequest(
-//            "http://localhost:9200/finance/events/_search?pretty=true",
-//            "{\"from\" : 0, \"size\" : 100}"
-//        );
-//
-//    }catch (Exception $e){
-//
-//    }
-//
-//    return JsonResponse::create($response);
-//});
+    }catch (Exception $e){
+        return JsonResponse::create(["code" => "200","message" => "teste"]);
+    }
 
-
-
-
-
-
-
+});
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
