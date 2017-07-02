@@ -5,21 +5,33 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 $app->get('/', function () use ($app) {
-    return $app['twig']->render('index.html.twig', array());
-})
-->bind('homepage');
 
-$app->get('/list_events', function () use ($app) {
+    $dateValue = explode("-", date("Y-m"));
+
+    return $app['twig']->render('index.html.twig',
+        array(
+            "year" => $dateValue[0],
+            "month" => $dateValue[1]
+        )
+    );
+})->bind('homepage');
+
+$app->get('/list_events', function (Request $request) use ($app) {
 
     try{
+        $data = '
+        {"sort" : [
+            { "date" : {"order" : "asc"}}
+        ],
+        "query": {"bool": {"must": [' . json_encode($request->get("data")) . ']}}}';
 
-        $result = $app['elastic']->defineMethod("listAction", "events", "{\"from\" : 0, \"size\" : 19}");
+        $result = $app['elastic']->defineMethod("listAction", "events", $data);
 
         return JsonResponse::create([
             "code" => "200",
             "message" => "Executado com sucesso",
-            "data" => $result]
-        );
+            "data" => $result
+        ]);
 
     }catch (Exception $e){
         return JsonResponse::create(["code" => "500","message" => $app['elastic']]);
@@ -42,7 +54,7 @@ $app->post('/add_events', function (Request $request) use ($app) {
         return JsonResponse::create(["code" => "200","message" => "Cadastrado com sucesso"]);
 
     }catch (Exception $e){
-        return JsonResponse::create(["code" => "200","message" => "teste"]);
+        return JsonResponse::create(["code" => $e->getCode(),"message" => $e->getMessage()]);
     }
 
 });

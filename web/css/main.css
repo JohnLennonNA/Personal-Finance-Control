@@ -5,3 +5,11 @@ body{background: #e8e6ff;}
 .fa-thumbs-up{ color: green;}
 
 .footerMenu{position: fixed; bottom: 0; padding: 7px; background: #aeaeae; width: 100%;}
+
+.dateLine{
+    display: block; padding: 40px; text-transform: uppercase;
+    color: dimgray;}
+
+.fa-angle-double-left,.fa-angle-double-right{padding: 55px; font-size: 40px;}
+.fa-angle-double-left:hover,.fa-angle-double-right:hover{color: #0000F0; font-weight: bold;
+    cursor: pointer;}

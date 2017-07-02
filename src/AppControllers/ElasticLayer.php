@@ -12,6 +12,7 @@ use AppControllers\Util;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class ElasticLayer implements ServiceProviderInterface
 {
@@ -24,9 +25,7 @@ class ElasticLayer implements ServiceProviderInterface
     }
 
     public function defineMethod($ref, $type, $data){
-
         return $this->{$ref}($data, $type);
-
     }
 
     public function listAction($data, $type){
@@ -47,7 +46,13 @@ class ElasticLayer implements ServiceProviderInterface
             "POST"
         );
 
-        return $response = "";
+        $response = json_decode($response, true);
+
+        switch ($response['status']){
+            case 400:
+            throw new Exception($response['error']['caused_by']['reason']);
+            break;
+        }
     }
 
 
