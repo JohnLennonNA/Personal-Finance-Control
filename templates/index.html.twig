@@ -68,122 +68,20 @@
     <div class="container-fluid footerMenu">
         <div class="row">
             <div class="col-md-2 text-center">
-                <span>Positive Value</span> R$ 00,00
+                <span>Positive Value</span> R$ <span class="positive green"></span>
             </div>
             <div class="col-md-2 text-center">
                 <i class="fa fa-minus-square" aria-hidden="true"></i>
             </div>
             <div class="col-md-2 text-center">
-                <span>Negative Value</span> R$ 00,00
+                <span>Negative Value</span> R$ <span class="negative red"></span>
             </div>
             <div class="col-md-2 text-center">
                 <i class="fa fa-hand-o-right" aria-hidden="true"></i>
             </div>
             <div class="col-md-2 text-center">
-                <span>Balance</span> R$ 00,00
+                <span>Balance</span> <b>R$ <span class="result bigFont green"></span></b>
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block javascript %}
-<script>
-    $( document ).ready(function() {
-
-        var date = $(".dateLine").attr("year")+"-"+$(".dateLine").attr("month");
-        var objSearch = { "data" : {"range": { "date":{"gte": date+"-01","lte": date+"-30"}}}};
-
-        sendRequest("list_events", objSearch, "GET", function(data){ listEvent(data); });
-
-        $(".formAddEvents").on("click", ".addEventsButton" , function(){
-            var objEvent = {
-                "description" : $(this).parent().find("#description").val(),
-                "value" : $(this).parent().find("#value").val(),
-                "date" : $(this).parent().find("#date").val(),
-                "type" : $(this).parent().find(".type:checked").val()
-            }
-
-            sendRequest("add_events", objEvent, "POST");
-        });
-
-        function listEvent(data){
-
-            $(".billList tr").remove();
-
-            var result = JSON.parse(data.data);
-            data = result.hits.hits;
-
-            for( var i in data ){
-                var icon = (data[i]._source.type == 1)? "down" : "up";
-                var body = "<td><i class='fa fa-thumbs-" + icon + "'></i></td>";
-                body += "<td>" + data[i]._source.date + "</td>";
-                body += "<td> R$ " + data[i]._source.value + "</td>";
-                body += "<td>" + data[i]._source.description + "</td>";
-                body += "<td><i class='fa fa-pencil editar initialism' title='Edit'></i>";
-                body += "<i class='fa fa-times excluir initialism' title='Remove'></i>";
-                body += "<i class='fa fa-money registrarPagamento initialism' title='Mark payed'></i></td>";
-                $(".billList").append("<tr>" + body + "</tr>");
-            }
-
-        }
-
-        function sendRequest(route, obj, methodType, callBack){
-            $.ajax({
-                cache: false,
-                url: "/" + route,
-                data: obj,
-                method: methodType,
-                success: function(data){
-                    if(callBack){
-                        callBack(data);
-                    }
-
-                    if(methodType != "GET"){
-                        location.reload();
-                    }
-                },
-                error: function(data){
-
-                }
-            });
-        }
-
-        $("body").on("click", ".changeMonthList" , function(){
-
-            var month = $(".dateLine").attr("month");
-            var year = $(".dateLine").attr("year");
-
-            if($(this).attr("ref") == "next"){
-                if(month == 12){
-                    month = 01;
-                    year++;
-                }else{
-                    month++;
-                }
-            }
-
-            if($(this).attr("ref") == "prev"){
-                if(month == 01){
-                    month = 12;
-                    year--;
-                }else{
-                    month--;
-                }
-            }
-
-            month = ("0" + month).slice(-2);
-
-            $(".dateLine").attr("year", year);
-            $(".dateLine").attr("month", month);
-            $(".dateLine").text("date: " + month + " / " + year);
-            date = year+"-"+month;
-            objSearch = { "data" : {"range": { "date":{"gte": date+"-01","lte": date+"-30"}}}};
-
-            sendRequest("list_events", objSearch, "GET", function(data){ listEvent(data); });
-        });
-
-    });
-
-
-</script>
 {% endblock %}

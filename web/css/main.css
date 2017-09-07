@@ -13,3 +13,11 @@ body{background: #e8e6ff;}
 .fa-angle-double-left,.fa-angle-double-right{padding: 55px; font-size: 40px;}
 .fa-angle-double-left:hover,.fa-angle-double-right:hover{color: #0000F0; font-weight: bold;
     cursor: pointer;}
+
+.green{ color: green; }
+.red{ color: red; }
+.bigFont{ font-size: 20px; }
+
+.payed{ text-decoration: line-through; color: #8c8c8c; }
+.buttons i{ margin: 5px;}
+.buttons i:hover{font-size: 20px; color: #0000F0; cursor: pointer;}

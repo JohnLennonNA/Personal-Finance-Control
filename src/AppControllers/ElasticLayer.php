@@ -55,5 +55,24 @@ class ElasticLayer implements ServiceProviderInterface
         }
     }
 
+    public function updateAction($data, $type){
+
+        $response = Util::CurlRequest(
+            "{$this->uri}{$this->db}/{$type}",
+            $data,
+            "PUT"
+        );
+
+        $response = json_decode($response, true);
+
+        switch ($response['status']){
+            case 400:
+                throw new Exception($response['error']['caused_by']['reason']);
+                break;
+        }
+    }
+
+
+
 
 }
