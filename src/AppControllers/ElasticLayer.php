@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ElasticLayer implements ServiceProviderInterface
 {
-    private $uri = "http://localhost:9200/";
+    private $uri = "http://127.0.0.1:9200/";
     private $db = "finance";
 
     public function register(Container $app)

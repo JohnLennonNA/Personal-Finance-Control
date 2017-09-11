@@ -20,7 +20,15 @@ $app->get('/list_events', function (Request $request) use ($app) {
 
     try{
         $data = '
-        {"sort" : [ { "date" : {"order" : "asc"}} ],
+        {
+            "from" : 0, "size" : 50,
+            "sort" : 
+                [{ 
+                    "date" : 
+                    {
+                        "order" : "asc"
+                    }
+                }],
         "query": {"bool": {"must": [' . json_encode($request->get("data")) . ']}}}';
 
         $result = $app['elastic']->defineMethod("listAction", "events", $data);

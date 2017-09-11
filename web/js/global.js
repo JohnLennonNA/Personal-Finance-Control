@@ -2,7 +2,6 @@ $( document ).ready(function() {
 
     var date = $(".dateLine").attr("year")+"-"+$(".dateLine").attr("month");
     var objSearch = { "data" : {"range": { "date":{"gte": date+"-01","lte": date+"-30"}}}};
-
     sendRequest("list_events", objSearch, "GET", function(data){ listEvent(data); });
 
     function listEvent(data){
@@ -10,23 +9,25 @@ $( document ).ready(function() {
         $(".billList tr").remove();
 
         var result = JSON.parse(data.data);
+
         data = result.hits.hits;
 
         for( var i in data ){
 
-            var teste = (data[i]._source.payed && data[i]._source.payed == 1) ? "payed" : "";
-
-                // " + (data[i]._source.payed && data[i]._source.payed == 1) ? "payed" : "" + "
+            var payedClass = (data[i]._source.payed && data[i]._source.payed == 1) ? "payed" : "";
 
             var icon = (data[i]._source.type == 1)? "down" : "up";
             var body = "<td><i class='fa fa-thumbs-" + icon + "'></i></td>";
             body += "<td>" + data[i]._source.date + "</td>";
             body += "<td> R$ " + data[i]._source.value + "</td>";
-            body += "<td>" + data[i]._source.description + teste + "</td>";
-            body += "<td class='buttons'><i class='fa fa-pencil editar initialism' title='Edit'></i>";
-            body += "<i class='fa fa-times excluir initialism' title='Remove'></i>";
-            body += "<i class='fa fa-money registrarPagamento initialism' title='Mark payed'></i></td>";
-            $(".billList").append("<tr eventId='" + data[i]._id + "' class='" + teste + "'>" + body + "</tr>");
+            body += "<td>" + data[i]._source.description + "</td>";
+            body += "<td class='buttons'>";
+            body += "<i class='fa fa-files-o duplicate' title='Duplicate to next month'></i>";
+            body += "<i class='fa fa-pencil edit initialism' title='Edit'></i>";
+            body += "<i class='fa fa-times delete initialism' title='Remove'></i>";
+            body += "<i class='fa fa-money registerPayment initialism' title='Mark payed'></i>";
+            body += "</td>";
+            $(".billList").append("<tr eventId='" + data[i]._id + "' class='" + payedClass + "'>" + body + "</tr>");
         }
 
         calcList();
@@ -75,12 +76,11 @@ $( document ).ready(function() {
         $(".result").text(entrance-out);
     }
 
-    $("body").on("click", ".changeMonthList" , function(){
-
+    function generateDate(ref) {
         var month = $(".dateLine").attr("month");
         var year = $(".dateLine").attr("year");
 
-        if($(this).attr("ref") == "next"){
+        if(ref == "next"){
             if(month == 12){
                 month = 01;
                 year++;
@@ -89,7 +89,7 @@ $( document ).ready(function() {
             }
         }
 
-        if($(this).attr("ref") == "prev"){
+        if(ref == "prev"){
             if(month == 01){
                 month = 12;
                 year--;
@@ -98,12 +98,22 @@ $( document ).ready(function() {
             }
         }
 
-        month = ("0" + month).slice(-2);
+        return {
+            "year": year,
+            "month": month
+        };
+    }
+    
+    $("body").on("click", ".changeMonthList" , function(){
 
-        $(".dateLine").attr("year", year);
+        var date = generateDate($(this).attr("ref"));
+
+        var month = ("0" + date.month).slice(-2);
+
+        $(".dateLine").attr("year", date.year);
         $(".dateLine").attr("month", month);
-        $(".dateLine").text("date: " + month + " / " + year);
-        date = year+"-"+month;
+        $(".dateLine").text("date: " + month + " / " + date.year);
+        date = date.year+"-"+month;
         objSearch = { "data" : {"range": { "date":{"gte": date+"-01","lte": date+"-30"}}}};
 
         sendRequest("list_events", objSearch, "GET", function(data){ listEvent(data); });
@@ -121,7 +131,7 @@ $( document ).ready(function() {
         sendRequest("add_events", objEvent, "POST");
     });
 
-    $("body").on("click", ".registrarPagamento" , function(){
+    $("body").on("click", ".registerPayment" , function(){
         var element = $(this).parents().eq(1).find("td");
         var objEvent = {
             "id" : $(this).parents().eq(1).attr("eventid"),
@@ -133,5 +143,24 @@ $( document ).ready(function() {
         }
 
         sendRequest("payed_bill", objEvent, "PUT");
+    });
+
+
+    $("body").on("click", ".duplicate" , function(){
+
+        date = generateDate("next");
+        var element = $(this).parents().eq(1).find("td");
+
+        confirm("Wish to duplicate this bill to the next month?");
+
+        var objEvent = {
+            "description" : $(element).eq(3).text(),
+            "value" : $(element).eq(2).text().substr(4),
+            "date" : date.year + "-" + date.month + "-" + $(element).eq(1).text().substr(8),
+            "type" : ($(element).eq(0).find(".fa-thumbs-down").length > 0) ? 1 : 0,
+            "payed" : 0
+        }
+
+        sendRequest("add_events", objEvent, "POST");
     });
 });
