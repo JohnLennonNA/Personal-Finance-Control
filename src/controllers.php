@@ -14,24 +14,17 @@ $app->get('/', function () use ($app) {
             "month" => $dateValue[1]
         )
     );
-})->bind('homepage');
+});
 
 $app->get('/list_events', function (Request $request) use ($app) {
 
     try{
-        $data = '
-        {
-            "from" : 0, "size" : 50,
-            "sort" : 
-                [{ 
-                    "date" : 
-                    {
-                        "order" : "asc"
-                    }
-                }],
-        "query": {"bool": {"must": [' . json_encode($request->get("data")) . ']}}}';
+        $data["from"] = 0;
+        $data["size"] = 50;
+        $data["sort"][0]["date"]["order"] = "asc";
+        $data["query"]["bool"]["must"][] = $request->get("data");
 
-        $result = $app['elastic']->defineMethod("listAction", "events", $data);
+        $result = $app['elastic']->defineMethod("listAction", "events", json_encode($data));
 
         return JsonResponse::create([
             "code" => "200",
@@ -75,7 +68,28 @@ $app->put('/payed_bill', function (Request $request) use ($app) {
             'value' => $request->request->get("value"),
             'date' => $request->request->get("date"),
             'type' => $request->request->get("type"),
-            'payed' => $request->request->get("payed"),
+            'payed' => 1,
+        ];
+
+        $app['elastic']->defineMethod("updateAction", "events/" . $request->request->get("id"), json_encode($data));
+        return JsonResponse::create(["code" => "200","message" => "Atualizado com sucesso"]);
+
+    }catch (Exception $e){
+        return JsonResponse::create(["code" => $e->getCode(),"message" => $e->getMessage()]);
+    }
+
+});
+
+$app->put('/remove_events', function (Request $request) use ($app) {
+
+    try{
+
+        $data = [
+            'description' => $request->request->get("description"),
+            'value' => $request->request->get("value"),
+            'date' => $request->request->get("date"),
+            'type' => $request->request->get("type"),
+            'removed' => 1,
         ];
 
         $app['elastic']->defineMethod("updateAction", "events/" . $request->request->get("id"), json_encode($data));

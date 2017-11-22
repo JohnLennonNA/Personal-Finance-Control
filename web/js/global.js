@@ -14,20 +14,22 @@ $( document ).ready(function() {
 
         for( var i in data ){
 
-            var payedClass = (data[i]._source.payed && data[i]._source.payed == 1) ? "payed" : "";
+            if(!data[i]._source.hasOwnProperty('removed')){
+                var payedClass = (data[i]._source.payed && data[i]._source.payed == 1) ? "payed" : "";
 
-            var icon = (data[i]._source.type == 1)? "down" : "up";
-            var body = "<td><i class='fa fa-thumbs-" + icon + "'></i></td>";
-            body += "<td>" + data[i]._source.date + "</td>";
-            body += "<td> R$ " + data[i]._source.value + "</td>";
-            body += "<td>" + data[i]._source.description + "</td>";
-            body += "<td class='buttons'>";
-            body += "<i class='fa fa-files-o duplicate' title='Duplicate to next month'></i>";
-            body += "<i class='fa fa-pencil edit initialism' title='Edit'></i>";
-            body += "<i class='fa fa-times delete initialism' title='Remove'></i>";
-            body += "<i class='fa fa-money registerPayment initialism' title='Mark payed'></i>";
-            body += "</td>";
-            $(".billList").append("<tr eventId='" + data[i]._id + "' class='" + payedClass + "'>" + body + "</tr>");
+                var icon = (data[i]._source.type == 1)? "down" : "up";
+                var body = "<td><i class='fa fa-thumbs-" + icon + "'></i></td>";
+                body += "<td>" + data[i]._source.date + "</td>";
+                body += "<td> R$ " + data[i]._source.value + "</td>";
+                body += "<td>" + data[i]._source.description + "</td>";
+                body += "<td class='buttons'>";
+                body += "<i class='fa fa-files-o duplicate' title='Duplicate to next month'></i>";
+                body += "<i class='fa fa-pencil edit initialism' title='Edit'></i>";
+                body += "<i class='fa fa-times removeBill initialism' title='Remove'></i>";
+                body += "<i class='fa fa-money registerPayment initialism' title='Mark payed'></i>";
+                body += "</td>";
+                $(".billList").append("<tr eventId='" + data[i]._id + "' class='" + payedClass + "'>" + body + "</tr>");
+            }
         }
 
         calcList();
@@ -41,8 +43,6 @@ $( document ).ready(function() {
             data: obj,
             method: methodType,
             success: function(data){
-
-                console.log(data);
 
                 if(callBack){
                     callBack(data);
@@ -138,12 +138,28 @@ $( document ).ready(function() {
             "description" : $(element).eq(3).text(),
             "value" : $(element).eq(2).text().substr(4),
             "date" : $(element).eq(1).text(),
-            "type" : ($(element).eq(0).find(".fa-thumbs-down").length > 0) ? 1 : 0,
-            "payed" : 1
+            "type" : ($(element).eq(0).find(".fa-thumbs-down").length > 0) ? 1 : 0
         }
 
         sendRequest("payed_bill", objEvent, "PUT");
     });
+
+    $("body").on("click", ".removeBill" , function(){
+        var element = $(this).parents().eq(1).find("td");
+        var objEvent = {
+            "id" : $(this).parents().eq(1).attr("eventid"),
+            "description" : $(element).eq(3).text(),
+            "value" : $(element).eq(2).text().substr(4),
+            "date" : $(element).eq(1).text(),
+            "type" : ($(element).eq(0).find(".fa-thumbs-down").length > 0) ? 1 : 0
+        }
+
+        sendRequest("remove_events", objEvent, "PUT");
+    });
+
+
+
+    // AV5uzoOKXlFVvutYTs9Q
 
 
     $("body").on("click", ".duplicate" , function(){
